@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.FFTW", "DspSharp.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.Buffers", "DspSharp.Buffers\DspSharp.Buffers.csproj", "{562F1B70-A693-4C6C-9EE1-B453777CB929}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.Demo", "DspSharp.Demo\DspSharp.Demo.csproj", "{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{562F1B70-A693-4C6C-9EE1-B453777CB929}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{562F1B70-A693-4C6C-9EE1-B453777CB929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{562F1B70-A693-4C6C-9EE1-B453777CB929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
