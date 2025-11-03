@@ -13,7 +13,7 @@ namespace DspSharp.Buffers
     /// </remarks>
     public sealed unsafe class Complex64Array : IDisposable
     {
-        private readonly void* ptr;
+        private void* handle;
 
         private bool isDisposed;
 
@@ -27,13 +27,25 @@ namespace DspSharp.Buffers
             nuint bytes = (nuint)(numElements * sizeof( Complex ));
 
             this.Count = numElements;
-            this.ptr = NativeMemory.AlignedAlloc( bytes, (nuint)alignment );
+            this.handle = NativeMemory.AlignedAlloc( bytes, (nuint)alignment );
         }
 
         /// <summary>
         /// Gets the number of elements in the array.
         /// </summary>
-        public int Count { get; init; }
+        public int Count { get; }
+
+        /// <summary>
+        /// Gets a handle to the array's memory.
+        /// </summary>
+        public void* Handle
+        {
+            get
+            {
+                CheckDisposed();
+                return this.handle;
+            }
+        }
 
         /// <summary>
         /// Returns a view of the array as a <see cref="Span{T}"/>.
@@ -42,7 +54,7 @@ namespace DspSharp.Buffers
         public Span<Complex> AsSpan()
         {
             CheckDisposed();
-            return new Span<Complex>( ptr, this.Count );
+            return new Span<Complex>( this.handle, this.Count );
         }
 
         /// <summary>
@@ -64,7 +76,8 @@ namespace DspSharp.Buffers
                 return;
             }
 
-            NativeMemory.Free( this.ptr );
+            NativeMemory.Free( this.handle );
+            this.handle = null;
             this.isDisposed = true;
         }
 

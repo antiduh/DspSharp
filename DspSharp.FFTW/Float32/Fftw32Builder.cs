@@ -13,13 +13,5 @@ namespace DspSharp.FFTW.Float32
                 return new Fftw32Plan( handle );
             }
         }
-
-        internal static void DestroyPlan( nint handle )
-        {
-            lock( Fftw32ApiLock.Lock )
-            {
-                NativeMethods32.DestroyPlan( handle );
-            }
-        }
     }
 }

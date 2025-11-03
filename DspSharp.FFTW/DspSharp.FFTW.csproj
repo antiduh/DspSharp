@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Float64\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DspSharp.Buffers\DspSharp.Buffers.csproj" />
   </ItemGroup>
 
