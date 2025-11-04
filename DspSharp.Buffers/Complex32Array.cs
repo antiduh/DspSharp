@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace DspSharp.Buffers
@@ -83,5 +84,7 @@ namespace DspSharp.Buffers
         {
             ObjectDisposedException.ThrowIf( this.isDisposed, this );
         }
+
+        public static implicit operator Span<Complex32>( Complex32Array array ) => array.AsSpan();
     }
 }

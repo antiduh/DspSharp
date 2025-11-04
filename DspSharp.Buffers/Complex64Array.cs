@@ -85,5 +85,7 @@ namespace DspSharp.Buffers
         {
             ObjectDisposedException.ThrowIf( this.isDisposed, this );
         }
+
+        public static implicit operator Span<Complex>( Complex64Array array ) => array.AsSpan();
     }
 }
