@@ -9,7 +9,7 @@ namespace DspSharp.Demo
     {
         static void Main( string[] args )
         {
-            int length = 512;
+            int length = 8192;
             Complex64Array input = new Complex64Array( length, 128 );
             Complex64Array output = new Complex64Array( length, 128 );
 
@@ -17,6 +17,17 @@ namespace DspSharp.Demo
 
             input.Clear();
 
+            FreqGenerator64 freq = new FreqGenerator64( 48000, 16000 );
+
+            freq.Process( input.AsSpan() );
+
+            plan.Execute();
+
+            var outputSpan = output.AsSpan();
+            for( int i = 0; i < length; i++ )
+            {
+                Console.WriteLine( outputSpan[i].Magnitude );
+            }
         }
     }
 }
