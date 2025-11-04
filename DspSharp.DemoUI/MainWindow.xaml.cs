@@ -24,20 +24,36 @@ namespace DspSharp.DemoUI
         {
             int length = 16384;
             Complex64Array input = new Complex64Array( length, 128 );
-            Span<Complex> inputSpan = input;
-
             Complex64Array output = new Complex64Array( length, 128 );
-            Span<Complex> outputSpan = output;
 
             var plan = Fftw64Builder.Create1( length, input, output, Direction.Forward, Options.Patient );
 
             input.Clear();
-            FreqGenerator64 freq = new FreqGenerator64( 48000, -1000 );
-            freq.Process( input.AsSpan() );
+
+            Complex64Array freq1Data = new Complex64Array( length, 128 );
+            Span<Complex> freq1DataSpan = freq1Data;
+            FreqGenerator64 freq1Gen = new FreqGenerator64( 48000, 1000 );
+
+            freq1Gen.Process( freq1Data );
+
+
+            Complex64Array freq2Data = new Complex64Array( length, 128 );
+            Span<Complex> freq2DataSpan = freq2Data;
+            FreqGenerator64 freq2Gen = new FreqGenerator64( 48000, 2000 );
+
+            freq2Gen.Process( freq2Data );
+
+            Span<Complex> inputSpan = input.AsSpan();
+
+            for( int i = 0; i < length; i++ )
+            {
+                inputSpan[i] = freq1DataSpan[i] + freq2DataSpan[i];
+            }
 
             plan.Execute();
 
 
+            Span<Complex> outputSpan = output.AsSpan();
             double[] mags = new double[length];
 
             for( int i = 0; i < length; i++ )

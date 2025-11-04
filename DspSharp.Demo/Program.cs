@@ -17,9 +17,25 @@ namespace DspSharp.Demo
 
             input.Clear();
 
-            FreqGenerator64 freq = new FreqGenerator64( 48000, 16000 );
+            Complex64Array freq1Data = new Complex64Array( length, 128 );
+            Span<Complex> freq1DataSpan = freq1Data;
+            FreqGenerator64 freq1Gen = new FreqGenerator64( 48000, 1000 );
 
-            freq.Process( input.AsSpan() );
+            freq1Gen.Process( freq1Data );
+
+
+            Complex64Array freq2Data = new Complex64Array( length, 128 );
+            Span<Complex> freq2DataSpan = freq2Data;
+            FreqGenerator64 freq2Gen = new FreqGenerator64( 48000, 2000 );
+
+            freq2Gen.Process( freq2Data );
+
+            Span<Complex> inputSpan = input.AsSpan();
+
+            for( int i = 0; i < length; i++ )
+            {
+                inputSpan[i] = freq1DataSpan[i] + freq2DataSpan[i];
+            }
 
             plan.Execute();
 
