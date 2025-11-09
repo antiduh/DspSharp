@@ -26,20 +26,22 @@ namespace DspSharp.DemoUI
             Complex64Array input = new Complex64Array( length, 128 );
             Complex64Array output = new Complex64Array( length, 128 );
 
-            var plan = Fftw64Builder.Create1( length, input, output, Direction.Forward, Options.Patient );
+            var plan = Fftw64Builder.Create1( length, input, output, Direction.Forward, Options.Measure );
 
             input.Clear();
 
             Complex64Array freq1Data = new Complex64Array( length, 128 );
             Span<Complex> freq1DataSpan = freq1Data;
-            NaiveFreqGenerator64 freq1Gen = new NaiveFreqGenerator64( 48000, 1000 );
+            //NaiveFreqGenerator64 freq1Gen = new( 48000, 1000 );
+
+            FastFreqGenerator64 freq1Gen = new( 48000, 16384, 500_000_000, 0.000_000_000_01, 128 );
+            freq1Gen.SetFrequency( 4801 );
 
             freq1Gen.Process( freq1Data );
 
-
             Complex64Array freq2Data = new Complex64Array( length, 128 );
             Span<Complex> freq2DataSpan = freq2Data;
-            NaiveFreqGenerator64 freq2Gen = new NaiveFreqGenerator64( 48000, 2000 );
+            NaiveFreqGenerator64 freq2Gen = new( 48000, 2000 );
 
             freq2Gen.Process( freq2Data );
 

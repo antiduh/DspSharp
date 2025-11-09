@@ -7,27 +7,35 @@ namespace DspSharp
     public class FastFreqGenerator64
     {
         private readonly int sampleRate;
-        private readonly int bufferSize;
+        private readonly int blockSize;
         private readonly int maxSamples;
         private readonly double epsilon;
+        private readonly int memAlignment;
 
         private Complex64Array? currBuffer;
 
+        private int position;
+
         private Complex64Array? newBuffer;
 
-        public FastFreqGenerator64( int sampleRate, int bufferSize, int maxSamples, double epsilon )
+        public FastFreqGenerator64( int sampleRate, int blockSize )
+            : this( sampleRate, blockSize, blockSize*10, 0.000_000_001, 128 )
+        { }
+
+        public FastFreqGenerator64( int sampleRate, int blockSize, int maxSamples, double epsilon, int memAlignment )
         {
             this.sampleRate = sampleRate;
-            this.bufferSize = bufferSize;
+            this.blockSize = blockSize;
             this.maxSamples = maxSamples;
             this.epsilon = epsilon;
+            this.memAlignment = memAlignment;
         }
 
-        public void PrepareNewSettings( double freq )
+        public void PrepareNewSettings( int freq )
         {
-            int strideLength = FindStrideLength( freq );
+            int strideLength = 2 * FindStrideLength( freq );
 
-            newBuffer = BuildBuffer( strideLength );
+            this.newBuffer = BuildBuffer( freq, strideLength );
         }
 
         public void ApplyNewSettings()
@@ -42,23 +50,62 @@ namespace DspSharp
 
             // Swap
             this.currBuffer = newBuffer;
+            this.position = 0;
 
             // Clean up.
             this.newBuffer = null;
             oldBuffer?.Dispose();
         }
 
-        public void SetFrequency( double freq )
+        public void SetFrequency( int freq )
         {
             PrepareNewSettings( freq );
             ApplyNewSettings();
         }
 
-        public void Process( Span<Complex> buffer )
+        public void Process( Span<Complex> output )
         {
+            Span<Complex> source;
+
+            int outputRemaining = output.Length;
+
+            source = GetChunk( outputRemaining );
+            source.CopyTo( output );
+
+            outputRemaining -= source.Length;
+
+            if( outputRemaining > 0 )
+            {
+                int outputPos = source.Length;
+            
+                source = GetChunk( outputRemaining );
+                source.CopyTo( output.Slice( outputPos ) );
+            }
         }
 
-        private int FindStrideLength( double newFreq )
+        private Span<Complex> GetChunk( int maxLength )
+        {
+            Span<Complex> source = this.currBuffer.AsSpan();
+
+            // Figure out how much we can provide.
+            int available = source.Length - this.position;
+            int chunkSize = Math.Min( maxLength, available );
+
+            // Slice out the next source chunk.
+            Span<Complex> chunk = source.Slice( this.position, chunkSize );
+
+            // Update accounting.
+            this.position += chunkSize;
+
+            if( this.position > source.Length - 1 )
+            {
+                this.position = 0;
+            }
+
+            return chunk;
+        }
+
+        private int FindStrideLength( int newFreq )
         {
             double phaseVelocity = Math.Tau * newFreq * 1.0 / sampleRate;
 
@@ -70,7 +117,7 @@ namespace DspSharp
 
             int i = 0;
 
-            for( ; i < this.bufferSize; i++ )
+            for( ; i < this.blockSize; i++ )
             {
                 angle *= phasor;
             }
@@ -85,7 +132,7 @@ namespace DspSharp
 
                 if( double.Abs( angle.Phase ) < epsilon )
                 {
-                    // If we did i multiplications, we make i+1 samples.
+                    // If we did `i` multiplications, we make `i+1` samples.
                     return i + 1;
                 }
             }
@@ -94,12 +141,32 @@ namespace DspSharp
 
         }
 
-        private Complex64Array BuildBuffer( int strideLength )
+        private Complex64Array BuildBuffer( int newFreq, int strideLength )
         {
-            throw new NotImplementedException();
+            Complex64Array buffer = new( strideLength, this.memAlignment );
+            Span<Complex> bufferSpan = buffer;
+
+            double phaseVelocity = Math.Tau * newFreq * 1.0 / sampleRate;
+
+            Complex angle = new Complex( 1, 0 );
+            Complex phasor = Complex.FromPolarCoordinates( 1.0, phaseVelocity );
+
+            for( int i = 0; i < strideLength; i++ )
+            {
+                bufferSpan[i] = angle;
+
+                angle *= phasor;
+
+                if( i % this.blockSize == 0 )
+                {
+                    Reunity(ref angle );
+                }
+            }
+
+            return buffer;
         }
 
-        private void Reunity( ref Complex value )
+        private static void Reunity( ref Complex value )
         {
             value = value / Complex.Abs( value );
         }
