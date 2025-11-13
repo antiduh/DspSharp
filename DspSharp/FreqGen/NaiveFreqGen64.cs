@@ -1,14 +1,14 @@
 ﻿using System.Numerics;
 
-namespace DspSharp
+namespace DspSharp.FreqGen
 {
-    public class NaiveFreqGenerator64
+    public class NaiveFreqGen64
     {
         private Complex phasor;
 
         private Complex angle;
 
-        public NaiveFreqGenerator64( int sampleRate, int frequency )
+        public NaiveFreqGen64( int sampleRate, int frequency )
         {
             this.angle = new Complex( 1.0, 0.0 );
 

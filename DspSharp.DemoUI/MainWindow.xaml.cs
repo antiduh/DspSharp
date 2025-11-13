@@ -3,6 +3,7 @@ using System.Windows;
 using DspSharp.Buffers;
 using DspSharp.FFTW;
 using DspSharp.FFTW.Float64;
+using DspSharp.FreqGen;
 
 namespace DspSharp.DemoUI
 {
@@ -34,14 +35,14 @@ namespace DspSharp.DemoUI
             Span<Complex> freq1DataSpan = freq1Data;
             //NaiveFreqGenerator64 freq1Gen = new( 48000, 1000 );
 
-            FastFreqGenerator64 freq1Gen = new( 48000, 16384, 500_000_000, 0.000_000_000_01, 128 );
+            FastFreqGen64 freq1Gen = new( 48000, 16384, 500_000_000, 0.000_000_000_01, 128 );
             freq1Gen.SetFrequency( 4801 );
 
             freq1Gen.Process( freq1Data );
 
             Complex64Array freq2Data = new Complex64Array( length, 128 );
             Span<Complex> freq2DataSpan = freq2Data;
-            NaiveFreqGenerator64 freq2Gen = new( 48000, 2000 );
+            NaiveFreqGen64 freq2Gen = new( 48000, 2000 );
 
             freq2Gen.Process( freq2Data );
 

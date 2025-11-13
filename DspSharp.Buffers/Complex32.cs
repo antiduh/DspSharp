@@ -18,5 +18,22 @@ namespace DspSharp.Buffers
             this.Real = real;
             this.Imaginary = imaginary;
         }
+
+        public static Complex32 FromPolarCoordinates( float magnitude, float angle )
+        {
+            (float sin, float cos) = float.SinCos( angle );
+
+            return new Complex32(
+                cos * magnitude,
+                sin * magnitude
+            );
+        }
+
+        public float Magnitude
+        {
+            get
+            {
+            }
+        }
     }
 }

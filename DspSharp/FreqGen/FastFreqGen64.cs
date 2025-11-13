@@ -2,9 +2,9 @@
 using System.Numerics;
 using DspSharp.Buffers;
 
-namespace DspSharp
+namespace DspSharp.FreqGen
 {
-    public class FastFreqGenerator64
+    public class FastFreqGen64
     {
         private readonly int sampleRate;
         private readonly int blockSize;
@@ -18,11 +18,11 @@ namespace DspSharp
 
         private Complex64Array? newBuffer;
 
-        public FastFreqGenerator64( int sampleRate, int blockSize )
+        public FastFreqGen64( int sampleRate, int blockSize )
             : this( sampleRate, blockSize, blockSize*10, 0.000_000_001, 128 )
         { }
 
-        public FastFreqGenerator64( int sampleRate, int blockSize, int maxSamples, double epsilon, int memAlignment )
+        public FastFreqGen64( int sampleRate, int blockSize, int maxSamples, double epsilon, int memAlignment )
         {
             this.sampleRate = sampleRate;
             this.blockSize = blockSize;
@@ -137,7 +137,7 @@ namespace DspSharp
                 }
             }
 
-            throw new Exception( $"{nameof(FastFreqGenerator64)} failed - unable to find suitable stride length." );
+            throw new Exception( $"{nameof(FastFreqGen64)} failed - unable to find suitable stride length." );
 
         }
 
