@@ -13,9 +13,9 @@ namespace DspSharp.FreqGen
         {
             this.angle = new Complex32( 1.0f, 0.0f );
 
-            double angularStep = 2.0 * Math.PI * frequency / sampleRate;
+            float angularStep = (float)(2.0f * Math.PI * frequency / sampleRate);
 
-            this.phasor = Complex32.FromPolarCoordinates( 1.0, angularStep );
+            this.phasor = Complex32.FromPolarCoordinates( 1.0f, angularStep );
         }
 
         public void Process( Span<Complex32> buffer )
@@ -28,7 +28,7 @@ namespace DspSharp.FreqGen
 
             // Recalibrate the value to the unit circle since the multiplication above will make it
             // drift over time.
-            this.angle = this.angle / Complex32.Abs( this.angle );
+            this.angle = this.angle / this.angle.Magnitude;
         }
     }
 }
