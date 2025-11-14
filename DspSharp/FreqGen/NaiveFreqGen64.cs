@@ -27,7 +27,7 @@ namespace DspSharp.FreqGen
 
             // Recalibrate the value to the unit circle since the multiplication above will make it
             // drift over time.
-            this.angle = this.angle / Complex.Abs( this.angle );
+            this.angle = this.angle / this.angle.Magnitude;
         }
     }
 }

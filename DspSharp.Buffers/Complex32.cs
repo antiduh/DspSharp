@@ -30,7 +30,9 @@ namespace DspSharp.Buffers
             );
         }
 
-        public float Magnitude => float.Hypot( this.Real, this.Imaginary );
+        public readonly float Magnitude => float.Hypot( this.Real, this.Imaginary );
+
+        public readonly float Phase => float.Atan2( this.Imaginary, this.Real );
 
         public static Complex32 operator*( Complex32 l, Complex32 r )
         {
