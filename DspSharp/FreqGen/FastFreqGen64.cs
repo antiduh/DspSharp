@@ -1,41 +1,29 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using DspSharp.Buffers;
 
 namespace DspSharp.FreqGen
 {
     public class FastFreqGen64
     {
-        private readonly int sampleRate;
-        private readonly int blockSize;
-        private readonly int maxSamples;
-        private readonly double epsilon;
-        private readonly int memAlignment;
-
         private Complex64Array? currBuffer;
 
         private int position;
 
         private Complex64Array? newBuffer;
 
+        private PhasorBuilder builder;
+
         public FastFreqGen64( int sampleRate, int blockSize )
-            : this( sampleRate, blockSize, blockSize*10, 0.000_000_001, 128 )
+            : this( sampleRate, blockSize, blockSize * 10, 0.000_000_001, 128 )
         { }
 
         public FastFreqGen64( int sampleRate, int blockSize, int maxSamples, double epsilon, int memAlignment )
         {
-            this.sampleRate = sampleRate;
-            this.blockSize = blockSize;
-            this.maxSamples = maxSamples;
-            this.epsilon = epsilon;
-            this.memAlignment = memAlignment;
-        }
+            this.builder = new PhasorBuilder( sampleRate, blockSize, maxSamples, epsilon, memAlignment );        }
 
         public void PrepareNewSettings( int freq )
         {
-            int strideLength = 2 * FindStrideLength( freq );
-
-            this.newBuffer = BuildBuffer( freq, strideLength );
+            this.newBuffer = this.builder.Build64( freq );
         }
 
         public void ApplyNewSettings()
@@ -77,7 +65,7 @@ namespace DspSharp.FreqGen
             if( outputRemaining > 0 )
             {
                 int outputPos = source.Length;
-            
+
                 source = GetChunk( outputRemaining );
                 source.CopyTo( output.Slice( outputPos ) );
             }
@@ -103,72 +91,6 @@ namespace DspSharp.FreqGen
             }
 
             return chunk;
-        }
-
-        private int FindStrideLength( int newFreq )
-        {
-            double phaseVelocity = Math.Tau * newFreq * 1.0 / sampleRate;
-
-            Complex angle = new Complex( 1, 0 );
-            Complex phasor = Complex.FromPolarCoordinates( 1.0, phaseVelocity );
-
-            // Step 1 - We want our minimum stride length to be at least one buffer length, so run
-            // the angle math until we're past one buffer.
-
-            int i = 0;
-
-            for( ; i < this.blockSize; i++ )
-            {
-                angle *= phasor;
-            }
-
-            Reunity( ref angle );
-
-            // Step 2 - Run the angle math until we detect that we're exceedingly close to zero.
-
-            for( ; i < maxSamples; i++ )
-            {
-                angle *= phasor;
-
-                if( double.Abs( angle.Phase ) < epsilon )
-                {
-                    // If we did `i` multiplications, we make `i+1` samples.
-                    return i + 1;
-                }
-            }
-
-            throw new Exception( $"{nameof(FastFreqGen64)} failed - unable to find suitable stride length." );
-
-        }
-
-        private Complex64Array BuildBuffer( int newFreq, int strideLength )
-        {
-            Complex64Array buffer = new( strideLength, this.memAlignment );
-            Span<Complex> bufferSpan = buffer;
-
-            double phaseVelocity = Math.Tau * newFreq * 1.0 / sampleRate;
-
-            Complex angle = new Complex( 1, 0 );
-            Complex phasor = Complex.FromPolarCoordinates( 1.0, phaseVelocity );
-
-            for( int i = 0; i < strideLength; i++ )
-            {
-                bufferSpan[i] = angle;
-
-                angle *= phasor;
-
-                if( i % this.blockSize == 0 )
-                {
-                    Reunity(ref angle );
-                }
-            }
-
-            return buffer;
-        }
-
-        private static void Reunity( ref Complex value )
-        {
-            value = value / Complex.Abs( value );
         }
     }
 }
