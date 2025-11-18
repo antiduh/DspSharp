@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp", "DspSharp\DspSharp.csproj", "{B8E4C4EA-6DF2-4784-8FE5-DA60B793DB52}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.Demo", "DspSharp.Demo\DspSharp.Demo.csproj", "{4E2BB5B4-600E-460C-8C22-43FD7C075F0A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.DemoUI", "DspSharp.DemoUI\DspSharp.DemoUI.csproj", "{1FBCAC90-46E4-465A-9988-6C583F28B3BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DspSharp.Tests", "DspSharp.Tests\DspSharp.Tests.csproj", "{F7065C8B-9244-477B-A5FA-13AA8761DAD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +85,18 @@ Global
 		{1FBCAC90-46E4-465A-9988-6C583F28B3BB}.Release|x64.Build.0 = Release|Any CPU
 		{1FBCAC90-46E4-465A-9988-6C583F28B3BB}.Release|x86.ActiveCfg = Release|Any CPU
 		{1FBCAC90-46E4-465A-9988-6C583F28B3BB}.Release|x86.Build.0 = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|x64.Build.0 = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Debug|x86.Build.0 = Debug|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|x64.ActiveCfg = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|x64.Build.0 = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|x86.ActiveCfg = Release|Any CPU
+		{F7065C8B-9244-477B-A5FA-13AA8761DAD6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,6 +17,11 @@ namespace DspSharp.FreqGen
             this.phasor = Complex.FromPolarCoordinates( 1.0, angularStep );
         }
 
+        public void Reset()
+        {
+            this.angle = new Complex( 1.0, 0.0 );
+        }
+
         public void Process( Span<Complex> buffer )
         {
             for( int i = 0; i < buffer.Length; i++ )
@@ -29,5 +34,6 @@ namespace DspSharp.FreqGen
             // drift over time.
             this.angle = this.angle / this.angle.Magnitude;
         }
+
     }
 }
