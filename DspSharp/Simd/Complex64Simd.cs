@@ -12,13 +12,14 @@ namespace DspSharp.Simd
     {
         public static void ComplexMultiply( Span<Complex> result, ReadOnlySpan<Complex> left, ReadOnlySpan<Complex> right )
         {
-            if( Sse.IsSupported )
-            {
-                ComplexMultiply_128( result, left, right );
-            }
-            else if( Avx2.IsSupported )
+            if( Avx2.IsSupported )
             {
                 ComplexMultiply_256( result, left, right );
+            }
+            
+            else if( Sse.IsSupported )
+            {
+                ComplexMultiply_128( result, left, right );
             }
             else
             {
