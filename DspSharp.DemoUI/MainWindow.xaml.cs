@@ -4,6 +4,8 @@ using DspSharp.Buffers;
 using DspSharp.FFTW;
 using DspSharp.FFTW.Float64;
 using DspSharp.FreqGen;
+using DspSharp.NRZL;
+using DspSharp.SineGenerator;
 
 namespace DspSharp.DemoUI
 {
@@ -18,10 +20,52 @@ namespace DspSharp.DemoUI
 
             this.WindowState = WindowState.Maximized;
 
-            BuildPlot();
+            BuildPlotNRZL();
         }
 
-        private void BuildPlot()
+        private void BuildPlotNRZL()
+        {
+            int numSamples = 128;
+            int bitrate = 2400;
+            int sampleRate = 48000;
+
+            double[] signal = new double[numSamples];
+
+            SineGeneratorF64 gen = new( 1.0, bitrate, sampleRate );
+
+            gen.Process( signal );
+            Clip( signal );
+            
+            NrzlDecoder nrzl = new( bitrate, sampleRate );
+            bool[] bits = new bool[numSamples];
+            int numBits = nrzl.Run( signal, bits );
+
+            double[] nrzlSamples = new double[numSamples + 10];
+
+            for( int i = 0; i < numBits; i++ )
+            {
+                double value = bits[i] ? 1.0 : -1.0;
+
+                nrzlSamples[3*i + 0] = value; 
+                nrzlSamples[3*i + 1] = value; 
+                nrzlSamples[3*i + 2] = value;
+            }
+
+            this.Plot.Plot.Add.Signal( signal );
+            this.Plot.Plot.Add.Signal( nrzlSamples );
+
+            this.Plot.Refresh();
+        }
+
+        private static void Clip( double[] samples )
+        {
+            for( int i = 0; i < samples.Length; i++ )
+            {
+                samples[i] = Math.Clamp( samples[i] * 1000.0, -1.0, +1.0 );
+            }
+        }
+
+        private void BuildPlotFFT()
         {
             int length = 16384;
             Complex64Array input = new Complex64Array( length, 128 );
