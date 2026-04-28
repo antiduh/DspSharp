@@ -19,7 +19,8 @@ namespace DspSharp.FreqGen
 
         public FastFreqGen64( int sampleRate, int blockSize, int maxSamples, double epsilon, int memAlignment )
         {
-            this.builder = new PhasorBuilder( sampleRate, blockSize, maxSamples, epsilon, memAlignment );        }
+            this.builder = new PhasorBuilder( sampleRate, blockSize, maxSamples, epsilon, memAlignment );
+        }
 
         public void PrepareNewSettings( int freq )
         {
