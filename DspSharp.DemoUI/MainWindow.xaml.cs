@@ -57,7 +57,7 @@ namespace DspSharp.DemoUI
             SineGeneratorF64 gen = new( 1.0, 0.48*bitrate, sampleRate );
 
             gen.Process( signal );
-            Clip( signal );
+            ClipSamples( signal );
 
             NrzlDecoder nrzl = new( bitrate, sampleRate )
             {
@@ -97,7 +97,7 @@ namespace DspSharp.DemoUI
             }
         }
 
-        private static void Clip( double[] samples )
+        private static void ClipSamples( double[] samples )
         {
             for( int i = 0; i < samples.Length; i++ )
             {

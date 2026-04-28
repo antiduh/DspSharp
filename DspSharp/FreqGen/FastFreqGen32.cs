@@ -1,4 +1,5 @@
-﻿using DspSharp.Buffers;
+﻿using System;
+using DspSharp.Buffers;
 
 namespace DspSharp.FreqGen
 {
@@ -6,11 +7,11 @@ namespace DspSharp.FreqGen
     {
         private readonly PhasorBuilder builder;
 
-        private Complex32Array? currBuffer;
+        private Complex32Array currBuffer;
 
         private int position;
 
-        private Complex32Array? newBuffer;
+        private Complex32Array newBuffer;
 
 
         public FastFreqGen32( int sampleRate, int blockSize )
@@ -35,7 +36,7 @@ namespace DspSharp.FreqGen
             }
 
             // Prepare
-            Complex32Array? oldBuffer = this.currBuffer;
+            Complex32Array oldBuffer = this.currBuffer;
 
             // Swap
             this.currBuffer = newBuffer;

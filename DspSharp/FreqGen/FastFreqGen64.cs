@@ -1,15 +1,16 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using DspSharp.Buffers;
 
 namespace DspSharp.FreqGen
 {
     public class FastFreqGen64
     {
-        private Complex64Array? currBuffer;
+        private Complex64Array currBuffer;
 
         private int position;
 
-        private Complex64Array? newBuffer;
+        private Complex64Array newBuffer;
 
         private PhasorBuilder builder;
 
@@ -35,7 +36,7 @@ namespace DspSharp.FreqGen
             }
 
             // Prepare
-            Complex64Array? oldBuffer = this.currBuffer;
+            Complex64Array oldBuffer = this.currBuffer;
 
             // Swap
             this.currBuffer = newBuffer;

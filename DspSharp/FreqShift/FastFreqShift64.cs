@@ -11,11 +11,11 @@ namespace DspSharp.FreqShift
 {
     public class FastFreqShift64
     {
-        private Complex64Array? currBuffer;
+        private Complex64Array currBuffer;
 
         private int position;
 
-        private Complex64Array? newBuffer;
+        private Complex64Array newBuffer;
 
         private PhasorBuilder builder;
 
@@ -42,7 +42,7 @@ namespace DspSharp.FreqShift
             }
 
             // Prepare
-            Complex64Array? oldBuffer = this.currBuffer;
+            Complex64Array oldBuffer = this.currBuffer;
 
             // Swap
             this.currBuffer = newBuffer;
