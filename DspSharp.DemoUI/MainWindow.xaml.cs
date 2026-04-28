@@ -20,23 +20,44 @@ namespace DspSharp.DemoUI
 
             this.WindowState = WindowState.Maximized;
 
-            BuildPlotNRZL();
+            BuildPlotNrzlEncoder();
         }
 
-        private void BuildPlotNRZL()
+        private void BuildPlotNrzlEncoder()
         {
-            int numSamples = 512;
-            int bitrate = 2400;
+            int numSamples = 128;
+            int bitrate = 16000;
+            int sampleRate = 48000;
+
+            int numBits = (numSamples * bitrate) / sampleRate;
+
+            double[] signal = new double[numSamples];
+            bool[] bits = new bool[numBits];
+
+            FillBits( bits );
+
+            NrzlEncoder nrzl = new( bitrate, sampleRate );
+
+            nrzl.Run( bits, signal );
+
+            this.Plot.Plot.Add.Signal( signal );
+            this.Plot.Refresh();
+        }
+
+        private void BuildPlotNRZLDecoder()
+        {
+            int numSamples = 1024;
+            int bitrate = 16000;
             int sampleRate = 48000;
 
             double[] signal = new double[numSamples];
 
             double[] debugSamples = new double[numSamples + 10];
 
-            SineGeneratorF64 gen = new( 0.1, 0.50*bitrate, sampleRate );
+            SineGeneratorF64 gen = new( 1.0, 0.48*bitrate, sampleRate );
 
             gen.Process( signal );
-            //Clip( signal );
+            Clip( signal );
 
             NrzlDecoder nrzl = new( bitrate, sampleRate )
             {
@@ -50,6 +71,30 @@ namespace DspSharp.DemoUI
             this.Plot.Plot.Add.Signal( debugSamples );
 
             this.Plot.Refresh();
+        }
+
+        private static void FillBits( bool[] bits )
+        {
+            int state = 0;
+            
+            for( int i = 0; i < bits.Length; i++ )
+            {
+                switch( state )
+                {
+                    case 0:
+                        bits[i] = false;
+                        state++;
+                        break;
+                    case 1:
+                        bits[i] = false;
+                        state++;
+                        break;
+                    case 2:
+                        bits[i] = true;
+                        state = 0;
+                        break;
+                }
+            }
         }
 
         private static void Clip( double[] samples )
