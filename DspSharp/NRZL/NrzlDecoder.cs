@@ -42,7 +42,11 @@ namespace DspSharp.NRZL
             this.phase = 0.0;
             this.nextSamplePhase = 0.5; // Trigger sampling at the center of the bit
             this.prevSample = 0.0;
+
+            this.DebugSamples = null;
         }
+
+        public double[] DebugSamples { get; set; }
 
         /// <summary>
         /// Calculates the minimum buffer size to store returned bits
@@ -78,8 +82,11 @@ namespace DspSharp.NRZL
         {
             int numDecodedBits = 0;
 
-            foreach( double sample in samples )
+            for( int i = 0; i < samples.Length; i++ ) 
             {
+                double sample = samples[i];
+                double lastBit = 0.0;
+
                 // Advance the phase by the dynamically tracked frequency
                 phase += measuredFreq;
 
@@ -110,10 +117,16 @@ namespace DspSharp.NRZL
                 {
                     // In NRZ-L, > 0 is typically Logic 1, <= 0 is Logic 0
                     bits[numDecodedBits] = sample > 0;
+                    lastBit = sample > 0 ? +1.0 : -1.0;
                     numDecodedBits++;
 
                     // Set threshold for the center of the next bit
                     nextSamplePhase += 1.0;
+                }
+
+                if( DebugSamples is double[] ds )
+                {
+                    ds[i] = lastBit;
                 }
 
                 // Wrap phases to prevent floating-point precision loss over long periods

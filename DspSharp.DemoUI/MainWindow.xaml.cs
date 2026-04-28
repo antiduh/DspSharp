@@ -25,34 +25,29 @@ namespace DspSharp.DemoUI
 
         private void BuildPlotNRZL()
         {
-            int numSamples = 128;
+            int numSamples = 512;
             int bitrate = 2400;
             int sampleRate = 48000;
 
             double[] signal = new double[numSamples];
 
-            SineGeneratorF64 gen = new( 1.0, bitrate, sampleRate );
+            double[] debugSamples = new double[numSamples + 10];
+
+            SineGeneratorF64 gen = new( 0.1, 0.50*bitrate, sampleRate );
 
             gen.Process( signal );
-            Clip( signal );
-            
-            NrzlDecoder nrzl = new( bitrate, sampleRate );
+            //Clip( signal );
+
+            NrzlDecoder nrzl = new( bitrate, sampleRate )
+            {
+                DebugSamples = debugSamples
+            };
+
             bool[] bits = new bool[numSamples];
             int numBits = nrzl.Run( signal, bits );
 
-            double[] nrzlSamples = new double[numSamples + 10];
-
-            for( int i = 0; i < numBits; i++ )
-            {
-                double value = bits[i] ? 1.0 : -1.0;
-
-                nrzlSamples[3*i + 0] = value; 
-                nrzlSamples[3*i + 1] = value; 
-                nrzlSamples[3*i + 2] = value;
-            }
-
             this.Plot.Plot.Add.Signal( signal );
-            this.Plot.Plot.Add.Signal( nrzlSamples );
+            this.Plot.Plot.Add.Signal( debugSamples );
 
             this.Plot.Refresh();
         }
