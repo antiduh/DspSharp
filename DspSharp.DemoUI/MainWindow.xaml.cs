@@ -54,7 +54,7 @@ namespace DspSharp.DemoUI
             int sampleRate = 48000;
 
             double genFreq = 0.48 * bitrate;
-            double genOffset = -0.5;
+            double genOffset = 0.0;
             double genAmp = 1.0;
 
             double[] signal = new double[numSamples];
@@ -74,6 +74,7 @@ namespace DspSharp.DemoUI
             bool[] bits = new bool[numSamples];
             int numBits = nrzl.Run( signal, bits );
 
+
             Signal sigPlot = this.Plot.Plot.Add.Signal( signal );
             sigPlot.LegendText = "Signal";
             SetPlotStyle( sigPlot );
@@ -85,6 +86,11 @@ namespace DspSharp.DemoUI
             Signal bitsPlot = this.Plot.Plot.Add.Signal( debugger.Bits );
             bitsPlot.LegendText = "Bits";
             SetPlotStyle( bitsPlot );
+
+            Signal intPlot = this.Plot.Plot.Add.Signal( debugger.IntegratorSamples );
+            intPlot.LegendText = "Integral";
+            intPlot.Data.YOffset = 3.0;
+            SetPlotStyle( intPlot );
 
             this.Plot.Refresh();
         }
