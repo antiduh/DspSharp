@@ -27,7 +27,7 @@ namespace DspSharp.SineGenerator
         {
             for( int i = 0; i < buffer.Length; i++ )
             {
-                buffer[i] = amplitude * Math.Sin( this.angle ) - offset;
+                buffer[i] = amplitude * Math.Sin( this.angle ) + offset;
 
                 this.angle += this.angleStep;
             }
