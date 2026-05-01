@@ -49,12 +49,12 @@ namespace DspSharp.DemoUI
 
         private void BuildPlotNRZLDecoder()
         {
-            int numSamples = 1024;
+            int numSamples = 512;
             int bitrate = 16000;
             int sampleRate = 48000;
 
-            double genFreq = 0.4999 * bitrate;
-            double genOffset = 0.0;
+            double genFreq = 0.48 * bitrate;
+            double genOffset = -0.5;
             double genAmp = 1.0;
 
             double[] signal = new double[numSamples];

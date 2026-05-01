@@ -1,4 +1,5 @@
 ﻿using System;
+using DspSharp.Statistics;
 
 namespace DspSharp.NRZL
 {
@@ -17,6 +18,8 @@ namespace DspSharp.NRZL
         private readonly double nominalFreq;
         private readonly double alpha;
         private readonly double beta;
+
+        private readonly SampleIntegrator integrator;
 
         private double phase;
         private double nextSamplePhase;
@@ -40,6 +43,8 @@ namespace DspSharp.NRZL
             this.phase = 0.0;
             this.nextSamplePhase = 0.5; // Trigger sampling at the end of the bit after integrating the signal.
             this.prevSample = 0.0;
+
+            this.integrator = new SampleIntegrator( 20 );
         }
 
         public INrzlDecoderDebug Debug { get; set; }
@@ -83,6 +88,10 @@ namespace DspSharp.NRZL
             for( int i = 0; i < samples.Length; i++ ) 
             {
                 double sample = samples[i];
+
+                this.integrator.Add( sample );
+                sample -= this.integrator.Avg();
+
                 double lastBit = 0.0;
 
                 // Advance the phase by the dynamically tracked frequency
