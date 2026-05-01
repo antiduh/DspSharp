@@ -4,13 +4,13 @@ using DspSharp.Collections;
 
 namespace DspSharp.Statistics
 {
-    public class SampleIntegrator
+    public class Window
     {
         private readonly int windowSize;
 
         private readonly CircularList<double> samples;
 
-        public SampleIntegrator( int windowSize )
+        public Window( int windowSize )
         {
             this.windowSize = windowSize;
             this.samples = new CircularList<double>( windowSize );
