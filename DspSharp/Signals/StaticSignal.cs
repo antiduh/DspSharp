@@ -19,5 +19,10 @@ namespace DspSharp.Signals
                 buffer[i] = value;
             }
         }
+
+        public T Get()
+        {
+            return this.value;
+        }
     }
 }
