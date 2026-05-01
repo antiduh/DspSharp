@@ -38,13 +38,11 @@ namespace DspSharp.NRZL
             this.beta = beta;
 
             this.phase = 0.0;
-            this.nextSamplePhase = 0.5; // Trigger sampling at the center of the bit
+            this.nextSamplePhase = 0.5; // Trigger sampling at the end of the bit after integrating the signal.
             this.prevSample = 0.0;
-
-            this.DebugSamples = null;
         }
 
-        public double[] DebugSamples { get; set; }
+        public INrzlDecoderDebug Debug { get; set; }
 
         /// <summary>
         /// Calculates the minimum buffer size to store returned bits
@@ -80,6 +78,8 @@ namespace DspSharp.NRZL
         {
             int numDecodedBits = 0;
 
+            double bitIntegral = 0;
+
             for( int i = 0; i < samples.Length; i++ ) 
             {
                 double sample = samples[i];
@@ -87,6 +87,10 @@ namespace DspSharp.NRZL
 
                 // Advance the phase by the dynamically tracked frequency
                 phase += measuredFreq;
+
+                bitIntegral += sample;
+
+                Debug.Integrator( bitIntegral );
 
                 // Detect zero-crossing transition
                 if( prevSample != 0.0 && sample != 0.0 && Math.Sign( prevSample ) != Math.Sign( sample ) )
@@ -110,31 +114,37 @@ namespace DspSharp.NRZL
                     measuredFreq = Math.Clamp( measuredFreq, nominalFreq * freqOffsetLow, nominalFreq * freqOffsetHigh );
                 }
 
+                Debug.Phase( this.phase - nextSamplePhase );
+
                 // If the adjusted phase crosses the sampling threshold, read the bit
                 if( phase >= nextSamplePhase )
                 {
                     // In NRZ-L, > 0 is typically Logic 1, <= 0 is Logic 0
-                    bits[numDecodedBits] = sample > 0;
-                    lastBit = sample > 0 ? +1.0 : -1.0;
+                    bool bit = sample > 0;
+
+                    bits[numDecodedBits] = bit;
+                    bitIntegral = 0;
+
+                    Debug.Bit( bit );
+
+                    lastBit = bits[numDecodedBits] ? +1.0 : -1.0;
                     numDecodedBits++;
 
                     // Set threshold for the center of the next bit
                     nextSamplePhase += 1.0;
-                }
 
-                if( DebugSamples is double[] ds )
-                {
-                    ds[i] = lastBit;
                 }
 
                 // Wrap phases to prevent floating-point precision loss over long periods
-                if( phase >= 1.0 && nextSamplePhase >= 1.5 )
-                {
-                    phase -= 1.0;
-                    nextSamplePhase -= 1.0;
-                }
+                //if( phase >= 1.0 && nextSamplePhase >= 1.5 )
+                //{
+                //    phase -= 1.0;
+                //    nextSamplePhase -= 1.0;
+                //}
 
                 prevSample = sample;
+
+                Debug.EndSample();
             }
 
             return numDecodedBits;
