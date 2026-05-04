@@ -131,20 +131,20 @@ namespace DspSharp.NRZL
                     // the start of the next bit. We need to split the integral in half.
                     // See diagrams in notes doc.
                     
-                    // Ratio indicating how close the end of the bit was to currSample, in time.
+                    // fraction: Ratio indicating how close in time the end of the bit was to currSample.
                     // * 0.1 would mean very close to prevSample.
                     // * 0.5 would mean halfway between prevSample and currSample.
                     // * 0.9 would mean very close to currSample. Keep in mind rst is negative.
                     //
-                    // Lets say:
+                    // Example. Lets say:
                     // * mf is 0.333 (one sample is 1/3 of a bit) and
-                    // * rst is -0.50 (bit ended 50 units prior to the current phase).
+                    // * rst is -0.050 (bit ended 50 units prior to the current phase).
                     //
                     // Then mf + (-.050) gives us 0.283.  0.283 / 0.333 == 0.849. 
                     // The end of the bit was 84.9% through the time between prevSample and currSample.
                     double fraction = ( measuredFreq + rst ) / measuredFreq;
 
-                    // The X axis value when the bit ended. Note that this value will be near to
+                    // bitEnd: The X axis value when the bit ended. Note that this value will be near to
                     // zero if the DPLL is working well and the data is well behaved.
                     double bitEnd = prevSample * ( 1 - fraction ) + currSample * fraction;
 
