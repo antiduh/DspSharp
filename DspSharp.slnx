@@ -1,0 +1,13 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="DspSharp.Buffers/DspSharp.Buffers.csproj" />
+  <Project Path="DspSharp.Demo/DspSharp.Demo.csproj" />
+  <Project Path="DspSharp.DemoUI/DspSharp.DemoUI.csproj" />
+  <Project Path="DspSharp.FFTW/DspSharp.FFTW.csproj" />
+  <Project Path="DspSharp.Tests/DspSharp.Tests.csproj" />
+  <Project Path="DspSharp/DspSharp.csproj" />
+</Solution>
