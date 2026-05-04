@@ -20,15 +20,15 @@ namespace DspSharp.NRZL
         private readonly double beta;
 
         private readonly Window dcRemover;
-        private readonly Window bitIntegrator;
 
         private double phase;
-        private double nextSamplePhase;
-
-        private double remainingPhase;
-
         private double measuredFreq;
+
         private double prevSample;
+        private double nextSamplePhase;
+        private double bitIntegral;
+
+
 
         /// <summary>
         /// Initializes a new instance of the NRZ-L Decoder with Clock Recovery.
@@ -46,11 +46,10 @@ namespace DspSharp.NRZL
 
             this.phase = 0.0;
             this.nextSamplePhase = 1.0; // Trigger sampling at the end of the bit after integrating the signal.
-            this.remainingPhase = 1.0;
             this.prevSample = 0.0;
 
             this.dcRemover = new Window( 30 );
-            this.bitIntegrator = new Window( 3 );
+            this.bitIntegral = 0.0;
         }
 
         public INrzlDecoderDebug Debug { get; set; }
@@ -96,8 +95,6 @@ namespace DspSharp.NRZL
                 this.dcRemover.Add( currSample );
                 currSample -= this.dcRemover.Avg();
 
-                double lastBit = 0.0;
-
                 // Advance the phase by the dynamically tracked frequency
                 phase += measuredFreq;
 
@@ -125,51 +122,65 @@ namespace DspSharp.NRZL
 
                 Debug.Phase( this.phase - nextSamplePhase );
 
-                // If the adjusted phase crosses the sampling threshold, read the bit
-                remainingPhase -= this.measuredFreq;
+                // remaining symbol time measured in phases (0.0 to 1.0)
+                double rst = this.nextSamplePhase - this.phase;
 
-                if( remainingPhase < 0 )
+                if( rst < 0 )
                 {
-                    // Somewhere between prevSample and currSample is exactly where phase 1.0 is,
-                    // aka, the exact end of the bit.
+                    // Somewhere between prevSample and currSample is the end of the current bit and
+                    // the start of the next bit. We need to split the integral in half.
+                    // See diagrams in notes doc.
+                    
+                    // Ratio indicating how close the end of the bit was to currSample, in time.
+                    // * 0.1 would mean very close to prevSample.
+                    // * 0.5 would mean halfway between prevSample and currSample.
+                    // * 0.9 would mean very close to currSample. Keep in mind rst is negative.
                     //
-                    // We need to interpolate between prevSample and currSample to figure out how
-                    // much to add to our integral of the bit's samples.
+                    // Lets say:
+                    // * mf is 0.333 (one sample is 1/3 of a bit) and
+                    // * rst is -0.50 (bit ended 50 units prior to the current phase).
                     //
-                    // Keep in mind that remainingPhase is negative. It's negative by the amount
-                    // that currSample is past the end of the bit.
-                    //
-                    // `phase - remainingPhase` gives us the value phase would have been when the
-                    // bit ended.
+                    // Then mf + (-.050) gives us 0.283.  0.283 / 0.333 == 0.849. 
+                    // The end of the bit was 84.9% through the time between prevSample and currSample.
+                    double fraction = ( measuredFreq + rst ) / measuredFreq;
 
+                    // The X axis value when the bit ended. Note that this value will be near to
+                    // zero if the DPLL is working well and the data is well behaved.
+                    double bitEnd = prevSample * ( 1 - fraction ) + currSample * fraction;
 
+                    // Compute the contribution of the end of the bit to the bit's integral.
+                    bitIntegral += fraction * ( prevSample + bitEnd ) / 2.0;
 
-
-                    // In NRZ-L, > 0 is typically Logic 1, <= 0 is Logic 0
-                    bool bit = this.bitIntegrator.Sum() > 0;
-
+                    // Declare the bit.
+                    bool bit = this.bitIntegral > 0.0;
                     bits[numDecodedBits] = bit;
-
+                    numDecodedBits++;
                     Debug.Bit( bit );
 
-                    lastBit = bits[numDecodedBits] ? +1.0 : -1.0;
-                    numDecodedBits++;
+                    // Reset stats and start working on the next bit.
+                    bitIntegral = 0;
+                    nextSamplePhase += 1.0;
 
-                    // Set threshold for the center of the next bit
-                    remainingPhase = 1.0;
+                    // Figure out how much of the prevSample-currSample interval contributes to the
+                    // *new* bit's value.
+                    bitIntegral += ( 1 - fraction ) * ( bitEnd + currSample ) / 2.0;
                 }
                 else
                 {
-                    this.bitIntegrator.Add( currSample );
-                    this.Debug.Integrator( this.bitIntegrator.Sum() );
+                    // Both prevSample and currSample are part of the current bit. Just calculate
+                    // their contribution to the bit's integral.
+
+                    bitIntegral += ( this.prevSample + currSample ) / 2.0;
                 }
 
+                Debug.Integrator( bitIntegral );
+
                 // Wrap phases to prevent floating-point precision loss over long periods
-                //if( phase >= 1.0 && nextSamplePhase >= 1.5 )
-                //{
-                //    phase -= 1.0;
-                //    nextSamplePhase -= 1.0;
-                //}
+                if( phase >= 1.0 && nextSamplePhase >= 1.5 )
+                {
+                    phase -= 1.0;
+                    nextSamplePhase -= 1.0;
+                }
 
                 prevSample = currSample;
 

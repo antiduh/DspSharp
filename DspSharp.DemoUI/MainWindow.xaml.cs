@@ -74,23 +74,23 @@ namespace DspSharp.DemoUI
             bool[] bits = new bool[numSamples];
             int numBits = nrzl.Run( signal, bits );
 
-
             Signal sigPlot = this.Plot.Plot.Add.Signal( signal );
             sigPlot.LegendText = "Signal";
             SetPlotStyle( sigPlot );
 
-            Signal phasePlot = this.Plot.Plot.Add.Signal( debugger.PhaseSamples );
-            phasePlot.LegendText = "Phase";
-            SetPlotStyle( phasePlot );
+            //Signal phasePlot = this.Plot.Plot.Add.Signal( debugger.PhaseSamples );
+            //phasePlot.LegendText = "Phase";
+            //SetPlotStyle( phasePlot );
 
             Signal bitsPlot = this.Plot.Plot.Add.Signal( debugger.Bits );
             bitsPlot.LegendText = "Bits";
+            bitsPlot.Data.YScale = 2.0;
             SetPlotStyle( bitsPlot );
 
-            Signal intPlot = this.Plot.Plot.Add.Signal( debugger.IntegratorSamples );
-            intPlot.LegendText = "Integral";
-            intPlot.Data.YOffset = 3.0;
-            SetPlotStyle( intPlot );
+            //Signal intPlot = this.Plot.Plot.Add.Signal( debugger.IntegratorSamples );
+            //intPlot.LegendText = "Integral";
+            //intPlot.Data.YOffset = 3.0;
+            //SetPlotStyle( intPlot );
 
             this.Plot.Refresh();
         }
