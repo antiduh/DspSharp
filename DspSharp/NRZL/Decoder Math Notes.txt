@@ -1,0 +1,103 @@
+NrzlDecoder computes the area of the bit by examining the samples that contribute to the bit.
+It then uses the area of the bit to declare its value after examining every sample that 
+contributed to the bit.
+
+Since the bit starts and ends between samples (it'll never perfectly start/end on a sample), 
+we have to deal with the boundary conditions of calculating what the y-axis value is at the
+start and end of the bit by linearly interpolating between the two samples that contain the 
+bit edge.
+
+Consider the following time-series graph of samples s1-s5 and interpolated points x1 & x2:
+
+                                 
+                 s3 o                          Sample values:
+                           s4 o                 * S1: -300
+       s2 o                                     * S2: +500
+                                                * S3: +800 
+                                    x2          * S4: +700
+|---------|---------|---------|---------|       * S5: -100
+     x1                                      
+                                        o s5  
+                                                                           
+o s1                                                                                 
+                                                                                 
+     
+                                  
+Annotated graph:
+                                 
+              333       333       333
+          |---------|<------->|<------->|
+          |         |         |         |
+          |         |         | 283 | 50|
+          |         |         |<--->|<->|
+          |      s3 o         |     |   |                                                    
+          |                s4 o     |   |                                                           
+       s2 o                         |   |                                              
+                                    |   |                                         
+                                    x2  |
+|---------|---------|---------|---------|                                                                                 
+     x1                                      
+     |------------------------------|   o s5                                                           
+           1 full phase / bit                                                                                 
+o s1                                                                                 
+                                                                                 
+
+Interpolated points:
+* x1: The end of the previous bit and the start of the current bit.
+* x2: The end of the current bit and the start of the next bit.
+* Note that points x1 and x2 should be near zero if the DPLL is working 
+  well and the data is well behaved.
+
+The bit is exactly between x1 and x2. The bit ends roughly between s4 and s5, closer to s5.
+
+`rst`: remaining symbol time. The amount of time, in units of phase (1.0 phase == 1 bit) before hitting
+the end of the bit (x2). When rst is negative, we've found the prevSample and currSample values that straddle 
+the end of the bit.
+
+The measuredFreq in this example is roughly 16000/48000 == 0.333; "roughly because its updated as per DPLL logic.
+It is written as 333 in the chart above for clarity/simplicity.
+
+          prevSample   currSample    rst          Math logic
+Step 1:   s2           s3            333 + 283    Just compute the area between s3 & s2 and add that to the integral.
+Step 2:   s3           s4            283          Just compute the area between s4 & s3 and add that to the integral.
+Step 3:   s4           s5            -50          Bit ended before s5; split the area to the current bit and the next bit.
+
+In step 1:
+   Just compute the area contributed between s2 and s3 and add it to our integral of the bit's area.
+   area   = [height]           * [width]
+          = [(s2 + s3) / 2.0 ] * 1.0
+   bitIntegral += (s2 + s3) / 2.0 
+
+In step 2:
+   Same.
+   bitIntegral += (s3 + s4) / 2.0
+
+In step 3 
+   Have to linearly interpolate point x2 and compute the area between s4 and x2.
+
+
+`fraction` is the ratio indicating how close the end of the bit was to s5.
+
+                (measuredFreq + rst)    (333 + -50)   283
+    fraction =  -------------------- =  ----------- = ---- = 0.849 = 84.9%
+                    measuredFreq            333       333
+
+To find x2's y-value, we linearly interpolate between s4 and s5 using fraction. 
+ --> The larger fraction is, the more that x2 is closer to s5.
+
+      x2 = s4 * (1-fraction) + s5*(fraction)
+         = 700 * (1 - 0.849) + -100 * 0.849 
+         = 105.7 + -84.9
+         = 20.8
+
+Then, what is the area of the polygon between s4 and x2? 
+Its the average of s4 and x2, but we have to pro-rate it because it's not full-width like the width between s3 and s4.
+
+       bitIntegral += fraction * (s4 + x2) / 2.0;
+
+At this point we have the complete integral for the bit. Threshold its value and declare the bit.
+       bit = bitIntegral > 0;
+
+Then reset stats and start computing the next bit. The start of the the next bit is the area between x2 and s5.
+       bitIntegral = 0.0;
+       bitIntegral += (1-fraction) * (x2 + s5)/2.0

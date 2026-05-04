@@ -150,7 +150,7 @@ namespace DspSharp.NRZL
                     double bitEnd = prevSample * ( 1 - fraction ) + currSample * fraction;
 
                     // Compute the contribution of the end of the bit to the bit's integral.
-                    bitIntegral += fraction * ( prevSample + bitEnd ) / 2.0;
+                    this.bitIntegral += fraction * ( prevSample + bitEnd ) / 2.0;
 
                     // Declare the bit.
                     bool bit = this.bitIntegral > 0.0;
@@ -189,11 +189,6 @@ namespace DspSharp.NRZL
             }
 
             return numDecodedBits;
-        }
-
-        private static double Interpolate( double prevSample, double currSample )
-        {
-            return Math.Abs( prevSample ) / ( Math.Abs( prevSample ) + Math.Abs( currSample ) );
         }
     }
 }
