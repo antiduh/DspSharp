@@ -54,7 +54,7 @@ namespace DspSharp.DemoUI
             int sampleRate = 48000;
 
             double genFreq = 0.48 * bitrate;
-            double genOffset = 0.0;
+            double genOffset = -0.4;
             double genAmp = 1.0;
 
             double[] signal = new double[numSamples];
