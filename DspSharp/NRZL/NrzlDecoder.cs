@@ -144,8 +144,9 @@ namespace DspSharp.NRZL
                     // The end of the bit was 84.9% through the time between prevSample and currSample.
                     double fraction = ( measuredFreq + rst ) / measuredFreq;
 
-                    // bitEnd: The X axis value when the bit ended. Note that this value will be near to
-                    // zero if the DPLL is working well and the data is well behaved.
+                    // bitEnd: The X axis value when the bit ended.
+                    // - Note that when processing alternating bits, this value is nearly zero if the
+                    //   data is well behaved and the DPLL is working well.
                     double bitEnd = prevSample * ( 1 - fraction ) + currSample * fraction;
 
                     // Compute the contribution of the end of the bit to the bit's integral.
