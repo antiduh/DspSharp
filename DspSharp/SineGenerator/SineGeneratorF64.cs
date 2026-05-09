@@ -16,8 +16,9 @@ namespace DspSharp.SineGenerator
         /// </summary>
         /// <param name="frequency">The frequency to generate</param>
         /// <param name="sampleRate">The number of samples per second.</param>
-        public SineGeneratorF64( double amplitude, double frequency, double offset, int sampleRate )
+        public SineGeneratorF64( double amplitude, double frequency, double initialPhase, double offset, int sampleRate )
         {
+            this.angle = initialPhase;
             this.amplitude = amplitude;
             this.offset = offset;
             this.angleStep = Math.Tau * frequency / sampleRate;

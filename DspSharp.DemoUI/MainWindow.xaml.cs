@@ -21,9 +21,72 @@ namespace DspSharp.DemoUI
 
             this.WindowState = WindowState.Maximized;
 
-
             //BuildPlotNrzlEncoder();
             BuildPlotNRZLDecoder();
+        }
+
+        private void BuildPlotNRZLDecoder()
+        {
+            int numSamples = 2048;
+            int bitrate = 8000;
+            int sampleRate = 48000;
+
+            double genFreq = ( 0.50 * bitrate ) * 0.90;
+            double genPhase = 0.0;
+            double genOffset = 0.0;
+            double genAmp = 1.0;
+
+            double[] signal = new double[numSamples];
+
+            SineGeneratorF64 gen = new( genAmp, genFreq, genPhase, genOffset, sampleRate );
+
+            gen.Process( signal );
+            ClipSamples( signal );
+
+            DecoderDebugger debugger = new DecoderDebugger( numSamples + 1 );
+
+            NrzlDecoder nrzl = new( bitrate, sampleRate )
+            {
+                Debug = debugger
+            };
+
+            bool[] bits = new bool[numSamples];
+            int numBits = nrzl.Run( signal, bits );
+
+            Signal freqPlot = this.Plot.Plot.Add.Signal( debugger.FreqSamples );
+            freqPlot.LegendText = "Freq Estimate";
+            freqPlot.Data.YOffset = 2.0;
+            freqPlot.Data.YScale = 10;
+            SetPlotStyle( freqPlot );
+
+            Signal phasePlot = this.Plot.Plot.Add.Signal( debugger.PhaseSamples );
+            phasePlot.LegendText = "Phase Error";
+            phasePlot.Data.YOffset = 1.5;
+            phasePlot.Data.YScale = 0.5;
+            SetPlotStyle( phasePlot );
+
+            Signal sigPlot = this.Plot.Plot.Add.Signal( signal );
+            sigPlot.LegendText = "Signal";
+            SetPlotStyle( sigPlot );
+
+            Signal bitsPlot = this.Plot.Plot.Add.Signal( debugger.Bits );
+            bitsPlot.LegendText = "Bits";
+            bitsPlot.Data.YScale = 1.2;
+            SetPlotStyle( bitsPlot );
+
+
+            //Signal intPlot = this.Plot.Plot.Add.Signal( debugger.IntegratorSamples );
+            //intPlot.LegendText = "Integral";
+            //intPlot.Data.YOffset = 3.0;
+            //SetPlotStyle( intPlot );
+
+            this.Plot.Refresh();
+        }
+        
+
+        private static void SetPlotStyle( Signal sig )
+        {
+            sig.MaximumMarkerSize = 5;
         }
 
         private void BuildPlotNrzlEncoder()
@@ -32,7 +95,7 @@ namespace DspSharp.DemoUI
             int bitrate = 16000;
             int sampleRate = 48000;
 
-            int numBits = (numSamples * bitrate) / sampleRate;
+            int numBits = ( numSamples * bitrate ) / sampleRate;
 
             double[] signal = new double[numSamples];
             bool[] bits = new bool[numBits];
@@ -47,63 +110,10 @@ namespace DspSharp.DemoUI
             this.Plot.Refresh();
         }
 
-        private void BuildPlotNRZLDecoder()
-        {
-            int numSamples = 512;
-            int bitrate = 16000;
-            int sampleRate = 48000;
-
-            double genFreq = 0.48 * bitrate;
-            double genOffset = -0.4;
-            double genAmp = 1.0;
-
-            double[] signal = new double[numSamples];
-
-            SineGeneratorF64 gen = new( genAmp, genFreq, genOffset, sampleRate );
-
-            gen.Process( signal );
-            //ClipSamples( signal );
-
-            DecoderDebugger debugger = new DecoderDebugger( numSamples + 1 );
-
-            NrzlDecoder nrzl = new( bitrate, sampleRate )
-            {
-                Debug = debugger
-            };
-
-            bool[] bits = new bool[numSamples];
-            int numBits = nrzl.Run( signal, bits );
-
-            Signal sigPlot = this.Plot.Plot.Add.Signal( signal );
-            sigPlot.LegendText = "Signal";
-            SetPlotStyle( sigPlot );
-
-            //Signal phasePlot = this.Plot.Plot.Add.Signal( debugger.PhaseSamples );
-            //phasePlot.LegendText = "Phase";
-            //SetPlotStyle( phasePlot );
-
-            Signal bitsPlot = this.Plot.Plot.Add.Signal( debugger.Bits );
-            bitsPlot.LegendText = "Bits";
-            bitsPlot.Data.YScale = 2.0;
-            SetPlotStyle( bitsPlot );
-
-            //Signal intPlot = this.Plot.Plot.Add.Signal( debugger.IntegratorSamples );
-            //intPlot.LegendText = "Integral";
-            //intPlot.Data.YOffset = 3.0;
-            //SetPlotStyle( intPlot );
-
-            this.Plot.Refresh();
-        }
-
-        private static void SetPlotStyle( Signal sig )
-        {
-            sig.MaximumMarkerSize = 5;
-        }
-
         private static void FillBits( bool[] bits )
         {
             int state = 0;
-            
+
             for( int i = 0; i < bits.Length; i++ )
             {
                 switch( state )
@@ -112,10 +122,12 @@ namespace DspSharp.DemoUI
                         bits[i] = false;
                         state++;
                         break;
+
                     case 1:
                         bits[i] = false;
                         state++;
                         break;
+
                     case 2:
                         bits[i] = true;
                         state = 0;
@@ -132,9 +144,10 @@ namespace DspSharp.DemoUI
             {
                 this.currentSample = 0;
 
-                this.Bits = new double[ numSamples ];
+                this.Bits = new double[numSamples];
                 this.IntegratorSamples = new double[numSamples];
                 this.PhaseSamples = new double[numSamples];
+                this.FreqSamples = new double[numSamples];
             }
 
             public double[] Bits { get; }
@@ -142,6 +155,8 @@ namespace DspSharp.DemoUI
             public double[] IntegratorSamples { get; }
 
             public double[] PhaseSamples { get; }
+
+            public double[] FreqSamples { get; }
 
             public void Bit( bool bit )
             {
@@ -156,6 +171,11 @@ namespace DspSharp.DemoUI
             public void Phase( double value )
             {
                 this.PhaseSamples[currentSample] = value;
+            }
+
+            public void Freq( double value )
+            {
+                this.FreqSamples[currentSample] = value;
             }
 
             public void EndSample()
@@ -205,7 +225,6 @@ namespace DspSharp.DemoUI
             }
 
             plan.Execute();
-
 
             Span<Complex> outputSpan = output.AsSpan();
             double[] mags = new double[length];

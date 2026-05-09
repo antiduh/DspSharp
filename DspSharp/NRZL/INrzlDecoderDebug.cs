@@ -13,5 +13,6 @@ namespace DspSharp.NRZL
         void Integrator( double value );
 
         void Phase( double value );
+        void Freq( double value );
     }
 }

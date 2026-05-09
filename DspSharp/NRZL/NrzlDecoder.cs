@@ -1,5 +1,6 @@
 ﻿using System;
 using DspSharp.Statistics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DspSharp.NRZL
 {
@@ -8,12 +9,12 @@ namespace DspSharp.NRZL
         /// <summary>
         /// Specifies the highest acceptable bitrate frequency offset as a ratio.
         /// </summary>
-        private const double freqOffsetHigh = 1.10;
+        private const double freqOffsetHigh = 1.20;
 
         /// <summary>
         /// Specifies the lowest acceptable bitrate frequency offset as a ratio.
         /// </summary>
-        private const double freqOffsetLow = 0.90;
+        private const double freqOffsetLow = 0.80;
 
         private readonly double nominalFreq;
         private readonly double alpha;
@@ -87,6 +88,7 @@ namespace DspSharp.NRZL
         public int Run( double[] samples, bool[] bits )
         {
             int numDecodedBits = 0;
+            double error = 0.0;
 
             for( int i = 0; i < samples.Length; i++ ) 
             {
@@ -109,7 +111,7 @@ namespace DspSharp.NRZL
 
                     // Transitions should theoretically occur exactly at integer boundaries (0.0, 1.0, etc.)
                     // The error is the distance from the actual crossing phase to the nearest integer.
-                    double error = Math.Round( zcPhase ) - zcPhase;
+                    /*double*/ error = Math.Round( zcPhase ) - zcPhase;
 
                     // Adjust phase (Proportional) and frequency (Integral)
                     phase += alpha * error;
@@ -119,8 +121,9 @@ namespace DspSharp.NRZL
                     // during long periods of silence or absence of transitions.
                     measuredFreq = Math.Clamp( measuredFreq, nominalFreq * freqOffsetLow, nominalFreq * freqOffsetHigh );
                 }
+                this.Debug.Phase( error );
 
-                Debug.Phase( this.phase - nextSamplePhase );
+                this.Debug.Freq( this.measuredFreq - this.nominalFreq );
 
                 // remaining symbol time measured in phases (0.0 to 1.0)
                 double rst = this.nextSamplePhase - this.phase;
