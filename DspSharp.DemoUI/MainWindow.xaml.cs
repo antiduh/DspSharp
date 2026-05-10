@@ -28,24 +28,27 @@ namespace DspSharp.DemoUI
         private void BuildPlotNRZLDecoder()
         {
             int numSamples = 2048;
-            int bitrate = 8000;
+            int bitrate = 16000;
             int sampleRate = 48000;
 
-            double genFreq = ( 0.50 * bitrate ) * 0.90;
+            double genFreq = ( 0.50 * bitrate ) * 1.0;
             double genPhase = 0.0;
-            double genOffset = 0.0;
+            double genOffset = 0;
             double genAmp = 1.0;
+
+            double phaseErrorAdjust = 0.08;
+            double freqErrorAdjust = 0.002;
 
             double[] signal = new double[numSamples];
 
             SineGeneratorF64 gen = new( genAmp, genFreq, genPhase, genOffset, sampleRate );
 
             gen.Process( signal );
-            ClipSamples( signal );
+            //ClipSamples( signal );
 
             DecoderDebugger debugger = new DecoderDebugger( numSamples + 1 );
 
-            NrzlDecoder nrzl = new( bitrate, sampleRate )
+            NrzlDecoder nrzl = new( bitrate, sampleRate, phaseErrorAdjust, freqErrorAdjust )
             {
                 Debug = debugger
             };
@@ -55,23 +58,24 @@ namespace DspSharp.DemoUI
 
             Signal freqPlot = this.Plot.Plot.Add.Signal( debugger.FreqSamples );
             freqPlot.LegendText = "Freq Estimate";
-            freqPlot.Data.YOffset = 2.0;
-            freqPlot.Data.YScale = 10;
+            freqPlot.Data.YOffset = 1;
+            freqPlot.Data.YScale = 2;
             SetPlotStyle( freqPlot );
 
             Signal phasePlot = this.Plot.Plot.Add.Signal( debugger.PhaseSamples );
             phasePlot.LegendText = "Phase Error";
-            phasePlot.Data.YOffset = 1.5;
+            phasePlot.Data.YOffset = 0.75;
             phasePlot.Data.YScale = 0.5;
             SetPlotStyle( phasePlot );
 
             Signal sigPlot = this.Plot.Plot.Add.Signal( signal );
             sigPlot.LegendText = "Signal";
+            sigPlot.Data.YScale = 0.5;
             SetPlotStyle( sigPlot );
 
             Signal bitsPlot = this.Plot.Plot.Add.Signal( debugger.Bits );
             bitsPlot.LegendText = "Bits";
-            bitsPlot.Data.YScale = 1.2;
+            bitsPlot.Data.YScale = 0.4;
             SetPlotStyle( bitsPlot );
 
 
