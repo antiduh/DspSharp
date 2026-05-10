@@ -111,7 +111,8 @@ namespace DspSharp.NRZL
 
                     // Transitions should theoretically occur exactly at integer boundaries (0.0, 1.0, etc.)
                     // The error is the distance from the actual crossing phase to the nearest integer.
-                    /*double*/ error = Math.Round( zcPhase ) - zcPhase;
+                    /*double*/
+                    error = Math.Round( zcPhase ) - zcPhase;
 
                     // Adjust phase (Proportional) and frequency (Integral)
                     phase += alpha * error;
@@ -121,9 +122,10 @@ namespace DspSharp.NRZL
                     // during long periods of silence or absence of transitions.
                     measuredFreq = Math.Clamp( measuredFreq, nominalFreq * freqOffsetLow, nominalFreq * freqOffsetHigh );
                 }
+
                 this.Debug.Phase( error );
 
-                this.Debug.Freq( this.measuredFreq - this.nominalFreq );
+                this.Debug.Freq( ( this.measuredFreq - this.nominalFreq ) / this.nominalFreq );
 
                 // remaining symbol time measured in phases (0.0 to 1.0)
                 double rst = this.nextSamplePhase - this.phase;
